@@ -1,4 +1,5 @@
-%% Copyright (c) 2013-2019 EMQ Technologies Co., Ltd. All Rights Reserved.
+%%--------------------------------------------------------------------
+%% Copyright (c) 2020 EMQ Technologies Co., Ltd. All Rights Reserved.
 %%
 %% Licensed under the Apache License, Version 2.0 (the "License");
 %% you may not use this file except in compliance with the License.
@@ -11,6 +12,7 @@
 %% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 %% See the License for the specific language governing permissions and
 %% limitations under the License.
+%%--------------------------------------------------------------------
 
 %% @doc Generate global unique id for mqtt message.
 %%
@@ -28,7 +30,14 @@
 
 -module(emqx_guid).
 
--export([gen/0, new/0, timestamp/1, to_hexstr/1, from_hexstr/1, to_base62/1, from_base62/1]).
+-export([ gen/0
+        , new/0
+        , timestamp/1
+        , to_hexstr/1
+        , from_hexstr/1
+        , to_base62/1
+        , from_base62/1
+        ]).
 
 -define(MAX_SEQ, 16#FFFF).
 
@@ -58,14 +67,7 @@ next(NPid, Seq) ->
 bin({Ts, NPid, Seq}) ->
     <<Ts:64, NPid:48, Seq:16>>.
 
-ts() ->
-    case erlang:function_exported(erlang, system_time, 1) of
-        true -> %% R18
-            erlang:system_time(micro_seconds);
-        false ->
-            {MegaSeconds, Seconds, MicroSeconds} = os:timestamp(),
-            (MegaSeconds * 1000000 + Seconds) * 1000000 + MicroSeconds
-    end.
+ts() -> erlang:system_time(micro_seconds).
 
 %% Copied from https://github.com/okeuday/uuid.git.
 npid() ->
@@ -129,6 +131,5 @@ to_base62(<<I:128>>) ->
     emqx_base62:encode(I).
 
 from_base62(S) ->
-    I = emqx_base62:decode(S, integer),
+    I = binary_to_integer( emqx_base62:decode(S)),
     <<I:128>>.
-
